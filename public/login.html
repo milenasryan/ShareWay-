@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Մուտք - ShareWay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <header class="bg-white shadow-md p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold"><a href="index.html">ShareWay</a></h1>
+    </header>
+    <main class="text-center py-16 flex-grow">
+        <h2 class="text-3xl font-bold mb-6">Մուտք</h2>
+        <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+            <input type="email" id="email" placeholder="Էլ․ փոստ" class="w-full p-2 mb-3 border rounded-md">
+            <input type="password" id="password" placeholder="Գաղտնաբառ" class="w-full p-2 mb-3 border rounded-md">
+            <button id="loginBtn" class="w-full bg-blue-600 text-white py-2 rounded-md">Մուտք</button>
+            <p class="mt-3 text-sm">Դեռ գրանցվա՞ծ չեք <a href="register.html" class="text-blue-500">Գրանցվել</a></p>
+        </div>
+    </main>
+    <footer class="text-center py-4 bg-gray-800 text-white mt-auto">
+        <p>© 2025 ShareWay | <a href="contact.html">Կապ</a> | <a href="about.html">Մեր մասին</a></p>
+    </footer>
+    <script>
+    document.getElementById("loginBtn").addEventListener("click", async function(event) {
+        event.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        
+        const response = await fetch("http://localhost:5067/api/users/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const result = await response.json();
+        if (response.ok) {
+            localStorage.setItem("userId", result.userId);
+            window.location.href = "profile.html";
+        } else {
+            alert(result.message);
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ուղևորության Մանրամասներ - ShareWay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#4da6ff',
+                            DEFAULT: '#0080ff',
+                            dark: '#0066cc',
+                        },
+                        secondary: {
+                            light: '#f8fafc',
+                            DEFAULT: '#f1f5f9',
+                            dark: '#e2e8f0',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-secondary text-gray-800 flex flex-col min-h-screen">
+
+<header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-primary">
+            <a href="index.html" class="flex items-center gap-2">
+                <i class="fas fa-road"></i>
+                <span>ShareWay</span>
+            </a>
+        </h1>
+        <nav class="hidden md:flex items-center space-x-6">
+            <a href="index.html" class="text-gray-600 hover:text-primary transition">Գլխավոր</a>
+            <a href="about.html" class="text-gray-600 hover:text-primary transition">Մեր մասին</a>
+            <a href="contact.html" class="text-gray-600 hover:text-primary transition">Կապ</a>
+            <a href="profile.html" class="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg transition flex items-center gap-2">
+                <i class="fas fa-user"></i>
+                <span>Իմ էջը</span>
+            </a>
+        </nav>
+        <button class="md:hidden text-gray-600" id="mobileMenuButton">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 px-4 py-2">
+        <nav class="flex flex-col space-y-2">
+            <a href="index.html" class="text-gray-600 hover:text-primary py-2 transition">Գլխավոր</a>
+            <a href="about.html" class="text-gray-600 hover:text-primary py-2 transition">Մեր մասին</a>
+            <a href="contact.html" class="text-gray-600 hover:text-primary py-2 transition">Կապ</a>
+            <a href="profile.html" class="bg-primary text-white py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 mt-2">
+                <i class="fas fa-user"></i>
+                <span>Իմ էջը</span>
+            </a>
+        </nav>
+    </div>
+</header>
+
+<main class="flex-grow container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <i class="fas fa-route text-primary mr-2"></i>
+                Ուղևորության Մանրամասներ
+            </h2>
+            <div id="tripDetails" class="space-y-4">
+                <p class="text-gray-500">Տվյալները բեռնվում են...</p>
+            </div>
+        </div>
+
+        <div id="requestForm" class="bg-white rounded-xl shadow-sm p-6 hidden">
+            <h3 class="text-xl font-bold mb-4">Գրանցվել ուղևորության</h3>
+            <textarea id="tripPurpose" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" rows="4" placeholder="Ճանապարհորդության նպատակ (ըստ ցանկության)"></textarea>
+            <button id="submitRequest" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition">Ուղարկել հայտը</button>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-gray-800 text-white py-6 mt-auto">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <a href="index.html" class="text-xl font-bold flex items-center">
+                    <i class="fas fa-road mr-2"></i>
+                    <span>ShareWay</span>
+                </a>
+                <p class="text-gray-400 mt-1">Օգնենք միմյանց, մի թողեք մարդկանց ճանապարհին</p>
+            </div>
+            <div class="flex gap-6">
+                <a href="about.html" class="text-gray-300 hover:text-white transition">Մեր մասին</a>
+                <a href="contact.html" class="text-gray-300 hover:text-white transition">Կապ</a>
+            </div>
+        </div>
+        <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-400">
+            <p>© 2025 ShareWay - Բարեգործական ուղևորափոխադրման հարթակ</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const routeId = urlParams.get("id");
+
+        if (!routeId) {
+            document.getElementById("tripDetails").innerHTML = "<p class='text-red-500'>Սխալ: ուղևորությունը գտնված չէ:</p>";
+            return;
+        }
+
+        try {
+            const tripResponse = await fetch(`http://localhost:5067/api/trips/${routeId}`);
+            const trip = await tripResponse.json();
+            if (!tripResponse.ok) throw new Error("Ուղևորությունը գտնված չէ։");
+
+            const driverResponse = await fetch(`http://localhost:5067/api/users/${trip.driverId}`);
+            const driver = await driverResponse.json();
+            if (!driverResponse.ok) throw new Error("Վարորդը գտնված չէ։");
+
+            document.getElementById("tripDetails").innerHTML = `
+                <div class="text-lg font-bold text-gray-800">${trip.from} → ${trip.to}</div>
+                <div class="text-gray-600"> ${new Date(trip.date).toLocaleDateString()} | ${new Date(trip.date).toLocaleTimeString()}</div>
+                <div class="text-gray-600">🚗 Ազատ տեղեր: ${trip.availableSeats}</div>
+                <hr class="my-4">
+                <div class="text-lg font-semibold">Վարորդի Տվյալներ</div>
+                <div class="text-gray-700">Անուն: ${driver.fullName}</div>
+                <div class="text-gray-700">Հեռախոս: ${driver.phone}</div>
+                <hr class="my-4">
+                <div class="text-lg font-semibold">Մեքենայի Տվյալներ</div>
+                <div class="text-gray-700">Մակնիշ: ${trip.carModel}</div>
+                <div class="text-gray-700">Գույն: ${trip.carColor}</div>
+                <button id="registerButton" class="mt-6 w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition">Գրանցվել ուղևորության</button>
+            `;
+
+            document.getElementById("registerButton").addEventListener("click", () => {
+                document.getElementById("requestForm").classList.remove("hidden");
+            });
+
+            document.getElementById("submitRequest").addEventListener("click", async () => {
+                const userId = localStorage.getItem("userId");
+                const tripPurpose = document.getElementById("tripPurpose").value;
+
+                if (!userId) {
+                    alert("Դուք պետք է մուտք գործեք համակարգ:");
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                const requestData = {
+                    routeId: routeId,
+                    userId: userId,
+                    purpose: tripPurpose
+                };
+
+                try {
+                    const requestResponse = await fetch("http://localhost:5067/api/RideRequests", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (requestResponse.ok) {
+                        alert("Ձեր հայտը հաջողությամբ ուղարկվեց վարորդին!");
+                        document.getElementById("requestForm").classList.add("hidden");
+                    } else {
+                        alert("Սխալ հայտի ուղարկման ժամանակ!");
+                    }
+                } catch (error) {
+                    console.error("Սխալ հայտի հարցման ժամանակ:", error);
+                }
+            });
+
+        } catch (error) {
+            console.error("Սխալ հարցման ժամանակ:", error);
+            document.getElementById("tripDetails").innerHTML = "<p class='text-red-500'>Տվյալները բեռնելու սխալ:</p>";
+        }
+    });
+</script>
+
+</body>
+</html>

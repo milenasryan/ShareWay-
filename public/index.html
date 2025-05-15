@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareWay - Բարեգործական ուղևորություններ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a202c;
+        }
+        
+        /* Custom Color Scheme */
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --light-bg: #f9fafb;
+            --dark-bg: #1f2937;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        .autocomplete-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            background: white;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .autocomplete-suggestion {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+        .autocomplete-suggestion:hover {
+            background: #f3f4f6;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #0d9668;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+            background-color: #f9fafb;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Navigation Styling */
+        .nav-link {
+            color: #4b5563;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: #f3f4f6;
+            color: var(--primary);
+        }
+        
+        /* Animated Call to Action */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .pulse-button {
+            animation: pulse 2s infinite;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var map = L.map('map').setView([40.1792, 44.4991], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const armenianLocations = [
+                "Երևան", "Գյումրի", "Վանաձոր", "Հրազդան", "Աշտարակ", "Գավառ", "Արտաշատ", "Կապան", "Արմավիր", "Իջևան", "Ապարան", "Սևան", "Դիլիջան", "Մեղրի", "Ալավերդի", "Մարտունի", "Մասիս", "Սիսիան", "Նոյեմբերյան", "Բերդ", "Եղեգնաձոր", "Ջերմուկ", "Վայք", "Տաշիր", "Սպիտակ", "Ճամբարակ"
+            ];
+
+            function setupAutocomplete(inputId) {
+                const input = document.getElementById(inputId);
+                const container = document.createElement("div");
+                container.classList.add("autocomplete-container");
+                input.parentNode.insertBefore(container, input);
+                container.appendChild(input);
+
+                const suggestionBox = document.createElement("div");
+                suggestionBox.classList.add("autocomplete-suggestions");
+                container.appendChild(suggestionBox);
+                
+                input.addEventListener("input", function() {
+                    const query = input.value.toLowerCase();
+                    suggestionBox.innerHTML = "";
+                    
+                    if (query.length < 1) return;
+                    
+                    const filteredResults = armenianLocations.filter(place => place.toLowerCase().includes(query));
+                    
+                    filteredResults.forEach(place => {
+                        const item = document.createElement("div");
+                        item.classList.add("autocomplete-suggestion");
+                        item.textContent = place;
+                        item.addEventListener("click", function() {
+                            input.value = place;
+                            suggestionBox.innerHTML = "";
+                        });
+                        suggestionBox.appendChild(item);
+                    });
+                });
+            }
+            
+            setupAutocomplete("from");
+            setupAutocomplete("to");
+        });
+    </script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    
+    <!-- Navigation -->
+    <header class="bg-white shadow-sm fixed w-full z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">
+                <a href="index.html" class="flex items-center">
+                    <i class="fas fa-route mr-2 text-primary"></i>
+                    <span>ShareWay</span>
+                </a>
+            </h1>
+            <div class="flex items-center space-x-6">
+                <a href="login.html" class="nav-link">Մուտք</a>
+                <a href="register.html" class="btn-primary text-sm">Գրանցում</a>
+                <a href="profile.html" class="relative">
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm hover:border-primary transition-all">
+                        <img id="profileAvatar" src="assets/images/no-user-photo.png" alt="Ավատար" class="w-full h-full object-cover">
+                    </div>
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Spacer for fixed header -->
+    <div class="h-16"></div>
+    
+    <!-- Map -->
+    <div id="map" class="w-full h-64 md:h-96 shadow-inner"></div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 flex-grow">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Բարությունն ունի ուղղություն, քոնը ո՞րն է</h2>
+            <p class="text-gray-600 mb-8">Միացիր մեզ և օգնիր մարդկանց հասնել իրենց նպատակակետին</p>
+        </div>
+        
+        <!-- Search Form -->
+        <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div class="flex items-center space-x-2 mb-6">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-search text-primary"></i>
+                </div>
+                <h3 class="font-medium text-lg">Որոնեք ուղևորություն</h3>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm text-gray-600 mb-1">Որտեղի՞ց</label>
+                <div class="autocomplete-container">
+                    <input id="from" type="text" placeholder="Օր․՝ Երևան" class="form-input">
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm text-gray-600 mb-1">Ու՞ր</label>
+                <div class="autocomplete-container">
+                    <input id="to" type="text" placeholder="Օր․՝ Գյումրի" class="form-input">
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm text-gray-600 mb-1">Ամսաթիվ</label>
+                <input type="date" class="form-input">
+            </div>
+            
+            <button id="search-btn" class="btn-primary w-full pulse-button">
+                <i class="fas fa-search mr-2"></i>Որոնում
+            </button>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-route mr-2"></i> ShareWay
+                    </h2>
+                    <p class="text-sm mt-2">Հասանելի ուղևորություններ բոլորի համար</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row md:space-x-12 space-y-4 md:space-y-0">
+                    <div>
+                        <h3 class="text-white font-medium mb-2">Օգտակար հղումներ</h3>
+                        <ul class="space-y-1">
+                            <li><a href="about.html" class="text-gray-400 hover:text-white text-sm">Մեր մասին</a></li>
+                            <li><a href="contact.html" class="text-gray-400 hover:text-white text-sm">Կապ</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-white font-medium mb-2">Կապ մեզ հետ</h3>
+                        <p class="text-sm text-gray-400">info@shareway.am</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm">
+                <p>© 2025 ShareWay | Բոլոր իրավունքները պաշտպանված են</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById("search-btn").addEventListener("click", function() {
+            const from = document.getElementById("from").value;
+            const to = document.getElementById("to").value;
+        
+            if (!from || !to) {
+                alert("Խնդրում ենք լրացնել երկու դաշտերը։");
+                return;
+            }
+        
+            window.location.href = `search-results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+        });
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            const userId = localStorage.getItem("userId");
+            if (userId) {
+                try {
+                    const response = await fetch(`http://localhost:5067/api/users/${userId}`);
+                    const user = await response.json();
+                    if (response.ok && user.profilePicture) {
+                        document.getElementById("profileAvatar").src = user.profilePicture;
+                    }
+                } catch (error) {
+                    console.error("Սխալ հարցման ժամանակ:", error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

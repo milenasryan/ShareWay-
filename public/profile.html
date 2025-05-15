@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="hy">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Անձնական էջ - ShareWay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#4da6ff',
+                            DEFAULT: '#0080ff',
+                            dark: '#0066cc',
+                        },
+                        secondary: {
+                            light: '#f8fafc',
+                            DEFAULT: '#f1f5f9',
+                            dark: '#e2e8f0',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .trip-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="bg-secondary text-gray-800 flex flex-col min-h-screen">
+
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-primary">
+                <a href="index.html" class="flex items-center gap-2">
+                    <i class="fas fa-road"></i>
+                    <span>ShareWay</span>
+                </a>
+            </h1>
+            <button id="logoutBtn"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-full transition flex items-center gap-2">
+                <span>Դուրս գալ</span>
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Profile Section -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+                <div class="bg-gradient-to-r from-primary to-primary-light h-32"></div>
+                <div class="px-6 pb-6 relative">
+                    <div class="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16">
+                        <div class="relative">
+                            <img id="profileImage" src="assets/images/no-user-photo.png" alt="Պրոֆիլի նկար"
+                                class="w-32 h-32 rounded-full border-4 border-white object-cover shadow-md" />
+                            <input type="file" id="uploadPhoto" class="hidden" accept="image/*" />
+                            <button onclick="document.getElementById('uploadPhoto').click()"
+                                class="absolute bottom-2 right-2 bg-white text-primary p-2 rounded-full shadow hover:bg-gray-100 transition">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="pt-16 md:pt-0 flex-grow">
+                            <h2 id="fullName" class="text-2xl font-bold text-gray-800">-</h2>
+                            <div class="flex flex-col sm:flex-row gap-4 mt-3">
+                                <p class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-envelope text-primary"></i>
+                                    <span id="email">-</span>
+                                </p>
+                                <p class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-phone text-primary"></i>
+                                    <span id="phone">-</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Created Trips -->
+                    <section class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-car-side text-primary mr-2"></i>
+                            Ստեղծված ուղևորություններ
+                        </h2>
+                        <div id="createdTrips" class="grid grid-cols-1 gap-4"></div>
+                    </section>
+
+                    <!-- Received Requests -->
+                    <section class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-inbox text-primary mr-2"></i>
+                            Ստացված հայտեր
+                        </h2>
+                        <div id="receivedRequests" class="grid grid-cols-1 gap-4"></div>
+                    </section>
+
+                    <!-- Sent Requests -->
+                    <section class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-paper-plane text-primary mr-2"></i>
+                            Իմ ուղևորության հայտերը
+                        </h2>
+                        <div id="sentRequests" class="grid grid-cols-1 gap-4"></div>
+                    </section>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <!-- Create Trip Form -->
+                    <section class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                        <h2 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-plus-circle text-primary mr-2"></i>
+                            Ստեղծել ուղևորություն
+                        </h2>
+                        <form id="createTripForm" class="space-y-4">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Մեկնման և ժամանման վայրեր</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                        </div>
+                                        <input type="text" id="from"
+                                            class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                            placeholder="Մեկնման կետ" required />
+                                    </div>
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-flag-checkered text-gray-400"></i>
+                                        </div>
+                                        <input type="text" id="to"
+                                            class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                            placeholder="Վերջնական կետ" required />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Ամսաթիվ և ժամ</label>
+                                <div class="relative mt-1">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-calendar-alt text-gray-400"></i>
+                                    </div>
+                                    <input type="datetime-local" id="date"
+                                        class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                        required />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Մեքենայի տվյալներ</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-car text-gray-400"></i>
+                                        </div>
+                                        <input type="text" id="carModel"
+                                            class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                            placeholder="Մեքենայի մակնիշ" required />
+                                    </div>
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-palette text-gray-400"></i>
+                                        </div>
+                                        <input type="text" id="carColor"
+                                            class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                            placeholder="Մեքենայի գույն" required />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Ազատ տեղերի քանակ</label>
+                                <div class="relative mt-1">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-users text-gray-400"></i>
+                                    </div>
+                                    <input type="number" id="seats"
+                                        class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                        placeholder="Ազատ տեղերի քանակ" min="1" required />
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Ստեղծել ուղևորություն</span>
+                            </button>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <a href="index.html" class="text-xl font-bold flex items-center">
+                        <i class="fas fa-road mr-2"></i>
+                        <span>ShareWay</span>
+                    </a>
+                    <p class="text-gray-400 mt-1">Օգնենք միմյանց, մի թողեք մարդկանց ճանապարհին</p>
+                </div>
+                <div class="flex gap-6">
+                    <a href="about.html" class="text-gray-300 hover:text-white transition">Մեր մասին</a>
+                    <a href="contact.html" class="text-gray-300 hover:text-white transition">Կապ</a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-700 text-center text-gray-400">
+                <p>© 2025 ShareWay - Բարեգործական ուղևորափոխադրման հարթակ</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5067/api/users/${userId}`);
+                const user = await response.json();
+                if (response.ok) {
+                    document.getElementById("fullName").textContent = user.fullName;
+                    document.getElementById("email").textContent = user.email;
+                    document.getElementById("phone").textContent = user.phone;
+                }
+            } catch (error) {
+                console.error("Ошибка при загрузке профиля:", error);
+            }
+
+            async function loadCreatedTrips() {
+                try {
+                    const response = await fetch(`http://localhost:5067/api/trips/user/${userId}`);
+                    const trips = await response.json();
+                    const container = document.getElementById("createdTrips");
+                    container.innerHTML = "";
+
+                    if (response.ok && Array.isArray(trips) && trips.length > 0) {
+                        trips.forEach(trip => {
+                            const div = document.createElement("div");
+                            div.classList = "p-4 border border-gray-200 rounded-lg shadow-sm bg-white trip-card";
+                            div.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div class="flex-grow">
+                                    <div class="flex items-center text-lg font-medium text-gray-900">
+                                        <i class="fas fa-map-marked-alt text-primary mr-2"></i>
+                                        ${trip.from} <i class="fas fa-arrow-right mx-2 text-gray-400"></i> ${trip.to}
+                                    </div>
+                                    <div class="mt-2 grid grid-cols-2 gap-2">
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="far fa-calendar-alt text-primary-light mr-2"></i>
+                                            ${trip.date ? new Date(trip.date).toLocaleDateString() : "Invalid Date"}
+                                        </div>
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="far fa-clock text-primary-light mr-2"></i>
+                                            ${trip.date ? new Date(trip.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Unknown"}
+                                        </div>
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="fas fa-car text-primary-light mr-2"></i>
+                                            ${trip.carModel} (${trip.carColor})
+                                        </div>
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="fas fa-users text-primary-light mr-2"></i>
+                                            ${trip.availableSeats} տեղ
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                    Ակտիվ
+                                </span>
+                            </div>
+                        `;
+                            container.appendChild(div);
+                        });
+                    } else {
+                        container.innerHTML = `
+                        <div class="text-center p-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                            <i class="fas fa-route text-gray-400 text-4xl mb-2"></i>
+                            <p class="text-gray-500">Դուք դեռ չեք ստեղծել ուղևորություններ:</p>
+                            <p class="text-gray-500 text-sm mt-1">Օգտագործեք աջ կողմի ձևաթուղթը՝ Ձեր առաջին ուղևորությունը ստեղծելու համար։</p>
+                        </div>
+                    `;
+                    }
+                } catch (error) {
+                    console.error("Ошибка при загрузке созданных поездок:", error);
+                }
+            }
+
+            async function loadDriverRequests() {
+                try {
+                    const response = await fetch(`http://localhost:5067/api/rideRequests/driver/${userId}`);
+                    const requests = await response.json();
+                    const container = document.getElementById("receivedRequests");
+                    container.innerHTML = "";
+
+                    if (response.ok && Array.isArray(requests) && requests.length > 0) {
+                        requests.forEach(req => {
+                            const div = document.createElement("div");
+                            div.classList = "p-4 border border-gray-200 rounded-lg shadow-sm bg-white trip-card";
+                            div.id = `request-item-${req.id}`;
+
+                            // Определение цвета статуса
+                            let statusClass = "bg-blue-100 text-blue-800"; // По умолчанию - ожидание
+                            if (req.status === "Accepted") {
+                                statusClass = "bg-green-100 text-green-800";
+                            } else if (req.status === "Rejected") {
+                                statusClass = "bg-red-100 text-red-800";
+                            }
+
+                            div.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="flex items-center font-medium">
+                                        <i class="fas fa-user text-primary mr-2"></i>
+                                        ${req.passengerName || "անհայտ"}
+                                    </div>
+                                    <p class="mt-2 text-gray-600">
+                                        <i class="fas fa-comment-alt text-primary-light mr-2"></i>
+                                        ${req.purpose || "Չնշված"}
+                                    </p>
+                                </div>
+                                <span class="status-span ${statusClass} text-xs font-medium px-2.5 py-0.5 rounded">
+                                    ${req.status}
+                                </span>
+                            </div>
+                        `;
+
+                            // Добавляем кнопки только если статус не определен (Pending)
+                            if (req.status !== "Accepted" && req.status !== "Rejected") {
+                                const buttonsDiv = document.createElement("div");
+                                buttonsDiv.className = "flex gap-2 mt-3";
+                                buttonsDiv.innerHTML = `
+                                <button class="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 accept-btn"
+                                        onclick="acceptRequest(${req.id})">
+                                    <i class="fas fa-check"></i>
+                                    <span>Ընդունել</span>
+                                </button>
+                                <button class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 decline-btn"
+                                        onclick="declineRequest(${req.id})">
+                                    <i class="fas fa-times"></i>
+                                    <span>Մերժել</span>
+                                </button>
+                            `;
+                                div.appendChild(buttonsDiv);
+                            }
+
+                            container.appendChild(div);
+                        });
+                    } else {
+                        container.innerHTML = `
+                        <div class="text-center p-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                            <i class="fas fa-inbox-in text-gray-400 text-4xl mb-2"></i>
+                            <p class="text-gray-500">Դուք դեռ հայտեր չեք ստացել:</p>
+                        </div>
+                    `;
+                    }
+                } catch (error) {
+                    console.error("Ошибка при загрузке заявок водителя:", error);
+                }
+            }
+
+            async function loadPassengerRequests() {
+    try {
+        const response = await fetch(`http://localhost:5067/api/rideRequests/passenger/${userId}`);
+        const requests = await response.json();
+        const container = document.getElementById("sentRequests");
+        container.innerHTML = "";
+
+        if (response.ok && Array.isArray(requests) && requests.length > 0) {
+            requests.forEach(req => {
+                // Սահմանում ենք ստատուսի տեսքը
+                let statusClass = "bg-blue-100 text-blue-800";
+                let statusIcon = "fas fa-clock";
+
+                if (req.status === "Accepted") {
+                    statusClass = "bg-green-100 text-green-800";
+                    statusIcon = "fas fa-check-circle";
+                } else if (req.status === "Rejected") {
+                    statusClass = "bg-red-100 text-red-800";
+                    statusIcon = "fas fa-times-circle";
+                }
+
+                const div = document.createElement("div");
+                div.classList = "p-4 border border-gray-200 rounded-lg shadow-sm bg-white trip-card";
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-grow">
+                            <div class="flex items-center text-lg font-medium text-gray-900">
+                                <i class="fas fa-map-marked-alt text-primary mr-2"></i>
+                                ${req.from || "Չնշված"} 
+                                <i class="fas fa-arrow-right mx-2 text-gray-400"></i> 
+                                ${req.to || "Չնշված"}
+                            </div>
+                            <div class="mt-2 space-y-1">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-comment-alt text-primary-light mr-2"></i>
+                                    ${req.purpose || "Առանց նշման"}
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="far fa-calendar-alt text-primary-light mr-2"></i>
+                                    ${req.date ? new Date(req.date).toLocaleString() : "Չնշված ամսաթիվ"}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="${statusClass} flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded">
+                            <i class="${statusIcon}"></i> ${req.status}
+                        </span>
+                    </div>
+                `;
+
+                // ✅ Ավելացնում ենք հրաժարվելու կոճակը, եթե հայտը հաստատված է
+                if (req.status === "Accepted") {
+                    const cancelButton = document.createElement("div");
+                    cancelButton.innerHTML = `
+                        <div class="mt-3">
+                            <button onclick="alert('Դուք հրաժարվեցիք ուղևորությունից։ Այս ֆունկցիան նախատեսված է ապագա թողարկման համար։')" 
+                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 justify-center w-full">
+                                <i class="fas fa-times-circle"></i> 
+                                Հրաժարվել ուղևորությունից
+                            </button>
+                        </div>
+                    `;
+                    div.appendChild(cancelButton);
+                }
+
+                container.appendChild(div);
+            });
+        } else {
+            container.innerHTML = `
+                <div class="text-center p-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <i class="fas fa-paper-plane text-gray-400 text-4xl mb-2"></i>
+                    <p class="text-gray-500">Դուք դեռ հայտ չեք ուղարկել:</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error("Սխալ հայտերի բեռնումից:", error);
+    }
+}
+
+            window.acceptRequest = async function (requestId) {
+                try {
+                    const resp = await fetch(`http://localhost:5067/api/rideRequests/accept/${requestId}`, {
+                        method: "POST"
+                    });
+                    if (resp.ok) {
+                        const item = document.getElementById(`request-item-${requestId}`);
+                        if (item) {
+                            const statusSpan = item.querySelector('.status-span');
+                            if (statusSpan) {
+                                statusSpan.className = 'status-span bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded';
+                                statusSpan.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Accepted';
+                            }
+
+                            const buttonsDiv = item.querySelector('.flex.gap-2');
+                            if (buttonsDiv) buttonsDiv.remove();
+                        }
+
+                        showToast("Հայտն ընդունվեց!", "success");
+                        loadPassengerRequests();
+                    } else {
+                        showToast("Չհաջողվեց ընդունել հայտը!", "error");
+                    }
+                } catch (err) {
+                    console.error("Ошибка acceptRequest:", err);
+                    showToast("Չհաջողվեց ընդունել հայտը!", "error");
+                }
+            };
+
+            window.declineRequest = async function (requestId) {
+                try {
+                    const resp = await fetch(`http://localhost:5067/api/rideRequests/decline/${requestId}`, {
+                        method: "POST"
+                    });
+                    if (resp.ok) {
+                        const item = document.getElementById(`request-item-${requestId}`);
+                        if (item) {
+                            const statusSpan = item.querySelector('.status-span');
+                            if (statusSpan) {
+                                statusSpan.className = 'status-span bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded';
+                                statusSpan.innerHTML = '<i class="fas fa-times-circle mr-1"></i>Rejected';
+                            }
+
+                            const buttonsDiv = item.querySelector('.flex.gap-2');
+                            if (buttonsDiv) buttonsDiv.remove();
+                        }
+
+                        showToast("Հայտն մերժվեց!", "info");
+                        loadPassengerRequests();
+                    } else {
+                        showToast("Չհաջողվեց մերժել հայտը!", "error");
+                    }
+                } catch (err) {
+                    console.error("Ошибка declineRequest:", err);
+                    showToast("Չհաջողվեց մերժել հայտը!", "error");
+                }
+            };
+
+            // Функция для показа уведомлений-тостов
+            function showToast(message, type = "info") {
+                // Удаляем предыдущий тост, если есть
+                const existingToast = document.getElementById('toast-notification');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                // Определяем цвета в зависимости от типа
+                let bgColor, textColor, icon;
+                switch (type) {
+                    case "success":
+                        bgColor = "bg-green-500";
+                        textColor = "text-white";
+                        icon = "fas fa-check-circle";
+                        break;
+                    case "error":
+                        bgColor = "bg-red-500";
+                        textColor = "text-white";
+                        icon = "fas fa-exclamation-circle";
+                        break;
+                    case "warning":
+                        bgColor = "bg-yellow-500";
+                        textColor = "text-white";
+                        icon = "fas fa-exclamation-triangle";
+                        break;
+                    default:
+                        bgColor = "bg-blue-500";
+                        textColor = "text-white";
+                        icon = "fas fa-info-circle";
+                }
+
+                // Создаем элемент тоста
+                const toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.className = `fixed bottom-5 right-5 ${bgColor} ${textColor} px-4 py-3 rounded-lg shadow-lg flex items-center z-50`;
+                toast.style.transition = 'all 0.3s ease-in-out';
+                toast.innerHTML = `
+                <i class="${icon} mr-2 text-xl"></i>
+                <span>${message}</span>
+                <button class="ml-4 text-white focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+                // Добавляем на страницу
+                document.body.appendChild(toast);
+
+                // Анимация появления
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                }, 10);
+
+                // Закрытие по кнопке
+                toast.querySelector('button').addEventListener('click', () => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                });
+
+                // Автоматическое закрытие через 3 секунды
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            //-----------------------------------------------------------
+            // Создание новой поездки (форма)
+            //-----------------------------------------------------------
+            document.getElementById("createTripForm").addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const tripData = {
+                    driverId: parseInt(userId),
+                    from: document.getElementById("from").value,
+                    to: document.getElementById("to").value,
+                    date: new Date(document.getElementById("date").value).toISOString(),
+                    carModel: document.getElementById("carModel").value,
+                    carColor: document.getElementById("carColor").value,
+                    availableSeats: parseInt(document.getElementById("seats").value),
+                    status: "Active",
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    const resp = await fetch("http://localhost:5067/api/trips", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(tripData)
+                    });
+                    if (resp.ok) {
+                        showToast("Ուղևորությունը հաջողությամբ ստեղծվել է!", "success");
+                        document.getElementById("createTripForm").reset();
+                        loadCreatedTrips();
+                    } else {
+                        const data = await resp.json();
+                        showToast("Սխալ ստեղծման ժամանակ: " + (data.message || 'Unknown Error'), "error");
+                    }
+                } catch (error) {
+                    console.error("Ошибка при создании поездки:", error);
+                    showToast("Սխալ հարցման ժամանակ!", "error");
+                }
+            });
+
+            //-----------------------------------------------------------
+            // Загрузка фото профиля
+            //-----------------------------------------------------------
+            document.getElementById("uploadPhoto").addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (evt) {
+                        document.getElementById("profileImage").src = evt.target.result;
+                        showToast("Լուսանկարը թարմացվեց", "success");
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            //-----------------------------------------------------------
+            // Кнопка выхода (logout)
+            //-----------------------------------------------------------
+            document.getElementById("logoutBtn").addEventListener("click", function () {
+                localStorage.removeItem("userId");
+                window.location.href = "login.html";
+            });
+
+            //-----------------------------------------------------------
+            // Первоначальная загрузка всех данных
+            //-----------------------------------------------------------
+            await loadCreatedTrips();
+            await loadDriverRequests();
+            await loadPassengerRequests();
+        });
+    </script>
+
+</body>
+
+</html>
