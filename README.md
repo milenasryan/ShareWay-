@@ -1,5 +1,4 @@
-# ShareWay-
-# ShareWay 🚗 
+# ShareWay- 🚗 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)  
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)  
 ![Tech Stack](https://img.shields.io/badge/Tech-ASP.NET_Core%20%7C%20PostgreSQL%20%7C%20JS-yellow.svg)
